@@ -15,12 +15,12 @@ LiquidCrystal_I2C lcd(0x27, _LCDML_DISP_cols, _LCDML_DISP_rows);
 String menu[] = {"Program: ", "Program aendern", "Program starten"};
 String programme[] = {"WA 18 / 3", "WA 30 / 60 / 90", "WA 0815", "WA ..."};
 String settings[] = {"Zeit", "Runden"};
-String start[] = {"Weiter", "Stop"};
+String startoptions[] = {"Weiter", "Stop"};
 
 int menuSelection = 0;
 int program = 0;
 int setting = 0;
-int start = 0;
+int startoption = 0;
 int currentPointer = 0;
 
 int menuCount = 3;
@@ -82,7 +82,7 @@ void drawLcd() {
       for (int i = 0; i < menuCount; i++) {
         lcd.setCursor(0, i);
         if (i == currentPointer)
-          lcd.write(126);
+          lcd.write(_LCDML_DISP_cfg_cursor);
         else
           lcd.print(" ");
         lcd.print(menu[i]);
@@ -94,7 +94,7 @@ void drawLcd() {
       for (int i = 0; i < programCount; i++) {
         lcd.setCursor(0, i);
         if (i == currentPointer)
-          lcd.write(126);
+          lcd.write(_LCDML_DISP_cfg_cursor);
         else
           lcd.print(" ");
         lcd.print(programme[i]);
@@ -104,7 +104,7 @@ void drawLcd() {
       for (int i = 0; i < settingsCount; i++) {
         lcd.setCursor(0, i);
         if (i == currentPointer)
-          lcd.write(126);
+          lcd.write(_LCDML_DISP_cfg_cursor);
         else
           lcd.print(" ");
         lcd.print(settings[i]);

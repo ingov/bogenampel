@@ -1,9 +1,10 @@
-#include <SPI.h>
+#include "SPI.h"
 #include "nRF24L01.h"             //RF24 library
 #include "RF24.h"                 //RF24 library
 #include "OneButton.h"            //button library
 #include "RotaryEncoder.h"        //rotary encoder library
-
+#include "Wire.h"
+#include "LiquidCrystal_I2C.h"
 
 // ***************** RF24 *************** //
 #define RF24_CE_PIN 6
@@ -15,6 +16,11 @@
 #define ENCODER_PIN_1  A2
 #define ENCODER_PIN_2  A3
 
+// ***************** LCD settings *************** //
+// settings for LCD
+#define _LCDML_DISP_cols 20
+#define _LCDML_DISP_rows 4
+#define _LCDML_DISP_cfg_cursor 0x7E   // cursor Symbol
 
 // radio setup
 RF24 radio(RF24_CE_PIN, RF24_CSN_PIN);                    // Hardware Konfiguration: RF24L01 Modul
@@ -26,6 +32,11 @@ RotaryEncoder encoder(ENCODER_PIN_1, ENCODER_PIN_2);
 // Setup a new OneButton on pin A1.
 OneButton button(ENCODER_PIN_B, true);
 
+// setup LCD
+LiquidCrystal_I2C lcd(0x27, _LCDML_DISP_cols, _LCDML_DISP_rows);
+
+bool buttonFired = false;
+int directionEncoder = 0;                                 // 0=nothing, 1=up, 2=down
 void setup() {
 
   // setup encoder
@@ -40,9 +51,13 @@ void setup() {
   //radio.stopListening();
 
   // setup button
-  button.attachClick(myClickFunction);
+  button.attachClick(buttonClicked);
   // set 80 msec. debouncing time. Default is 50 msec.
   button.setDebounceTicks(80);
+
+  lcd.init();
+  lcd.backlight();
+  drawLcd();
 
   Serial.begin(9600);
 }
@@ -58,21 +73,22 @@ void loop() {
   button.tick();
 
   static int pos = 0;
-
   int newPos = encoder.getPosition();
-  if (newPos < 0) {
-    newPos = 0;
-    encoder.setPosition(0);
-  }
   if (pos != newPos) {
-    Serial.print(newPos);
-    Serial.println();
+    if (pos < newPos)
+      directionEncoder = 1;
+    else
+      directionEncoder = 2;
     pos = newPos;
+    updateLcd();
+    directionEncoder = 0;
   }
-
-
+  if (buttonFired) {
+    updateLcd();
+    buttonFired = false;
+  }
 }
 
-void myClickFunction() {
-  Serial.println("myClickFunction");
-} // myClickFunction
+void buttonClicked() {
+  buttonFired = true;
+}
