@@ -1,64 +1,75 @@
 #include <Menu.h>
 #define SIZEOF(m) (sizeof(m)/sizeof(m[0]))
 int id = 1;
+int rotation = 0;
+bool buttonfired = false;
+#define BLOCKSIZE 4
+#define MAXENTRIES 11
 
-Menu menuentries [9] = {
+Menu menuentries [MAXENTRIES] = {
   { 1, 0, "Menu 1" },
   { 2, 0, "Menu 2" },
   { 3, 0, "Menu 3" },
   { 4, 0, "Menu 4" },
-  { 5, 1, "Menu 1 1" },
-  { 6, 1, "Menu 1 2" },
-  { 7, 2, "Menu 2 1" },
-  { 8, 2, "Menu 2 2" },
-  { 9, 3, "Menu 3 1" }
+  { 5, 0, "Menu 5" },
+  { 6, 0, "Menu 6" },
+  { 7, 1, "Menu 1 1" },
+  { 8, 1, "Menu 1 2" },
+  { 9, 2, "Menu 2 1" },
+  { 10, 2, "Menu 2 2" },
+  { 11, 3, "Menu 3 1" }
 };
 
 
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
   Serial.println("test");
 
   printMenu();
-  id=3;
+  rotation = 3;
   printMenu();
-  id=5;
+  rotation = 1;
   printMenu();
-  id=6;
+  rotation = 1;
   printMenu();
-  id=9;
+  rotation = -3;
   printMenu();
 }
 
 
 void printMenu() {
   Serial.println("---------");
-  int level=0;
+  int currentParent = menuentries[id].parent;
+  int newId = id + rotation;
+  newId = (newId < 1) ? 1 : newId;
+  newId = (newId > MAXENTRIES) ? MAXENTRIES : newId;
+  id = (menuentries[id - 1].parent == menuentries[newId - 1].parent) ? newId : id;
+  int parent = 0;
+  int offset = 0;
   for (int i = 0; i < SIZEOF(menuentries); i++) {
     if (menuentries[i].id == id) {
-      level=menuentries[i].parent;
+      parent = menuentries[i].parent;
+      offset = i;
       break;
     }
   }
-
-  
+  int count = 0;
   for (int i = 0; i < SIZEOF(menuentries); i++) {
-    if (menuentries[i].parent == level) {
-      Serial.print("Name: ");
+    if (i > (offset -BLOCKSIZE) && count < BLOCKSIZE && menuentries[i].parent == parent) {
       if (menuentries[i].id == id) {
-        Serial.print(">");
+        Serial.print("-> ");
       }
       else {
-        Serial.print(" ");
+        Serial.print("   ");
       }
       menuentries[i].execute();
-
+      count++;
     }
   }
-
+  rotation = 0;
 }
+
 void loop() {
   // put your main code here, to run repeatedly:
 
