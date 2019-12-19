@@ -12,7 +12,13 @@ Menu	KEYWORD1	Menu
 # Methods and Functions (KEYWORD2)
 #######################################
 execute	KEYWORD2
+noFunc KEYWORD2
+parent KEYWORD2
+lable KEYWORD2
+callBack KEYWORD2
+isEntry KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
+id LITERAL1
