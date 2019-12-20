@@ -1,8 +1,26 @@
 #include <Menu.h>
+#include "SPI.h"
+#include "nRF24L01.h"             //RF24 library
+#include "RF24.h"                 //RF24 library
+#include "OneButton.h"            //button library
+#include "RotaryEncoder.h"        //rotary encoder library
+#include "Wire.h"
+#include "LiquidCrystal_I2C.h"
+
+// ***************** LCD settings *************** //
+#define LCDML_DISP_cols 20
+#define LCDML_DISP_rows 4
+#define LCDML_DISP_cfg_cursor 0x7E   // cursor Symbol
+
+// ***************** rotary encoder *************** //
+#define ENCODER_PIN_B  A1
+#define ENCODER_PIN_1  A2
+#define ENCODER_PIN_2  A3
+
 #define SIZEOF(m) (sizeof(m)/sizeof(m[0]))
 int id = 1;
-int rotation = 0;
-bool buttonfired = false;
+int directionEncoder = 0;
+bool buttonFired = false;
 #define BLOCKSIZE 4
 #define MAXENTRIES 20
 
@@ -10,6 +28,15 @@ bool buttonfired = false;
 int choosenProgram = 8;
 int choosenTimeSetting = 13;
 /******* Program settings *********/
+
+// LCD setup
+LiquidCrystal_I2C lcd(0x27, LCDML_DISP_cols, LCDML_DISP_rows);
+
+// rotary encoder setup
+RotaryEncoder encoder(ENCODER_PIN_1, ENCODER_PIN_2);
+
+// Setup a new OneButton on pin A1.
+OneButton button(ENCODER_PIN_B, true);
 
 // represents the Menu-structure
 Menu menuentries [MAXENTRIES] = {
@@ -39,30 +66,52 @@ Menu menuentries [MAXENTRIES] = {
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("test");
-  updateLCD;
 
+  lcd.init();
+  lcd.backlight();
+
+  // You may have to modify the next 2 lines if using other pins than A2 and A3
+  PCICR |= (1 << PCIE1);    // This enables Pin Change Interrupt 1 that covers the Analog input pins or Port C.
+  PCMSK1 |= (1 << PCINT10) | (1 << PCINT11);  // This enables the interrupt for pin 2 and 3 of Port C.
+
+  // setup button
+  button.attachClick(buttonClicked);
+  // set 80 msec. debouncing time. Default is 50 msec.
+  button.setDebounceTicks(80);
+
+  delay(1000);
+  updateLCD();
+
+/*
+delay(800);
   buttonfired = true; // click Program
-  updateLCD;
-
-  rotation = -1; // go up
-  updateLCD;
-
+  updateLCD();
+delay(800);
+  rotation = -1; // go up 
+  updateLCD();
+delay(800);
   buttonfired = true; // set Program
-  updateLCD;
-
+  updateLCD();
+delay(800);
   rotation = 1; // go to settings
-  updateLCD;
-
+  updateLCD();
+delay(800);
   buttonfired = true; // click settings
-  updateLCD;
-
+  updateLCD();
+delay(800);
   buttonfired = true; // click settings
-  updateLCD;
-
+  updateLCD();
+delay(800);
+*/
 }
 
+void buttonClicked() {
+  buttonFired = true;
+}
 
+ISR(PCINT1_vect) {
+  encoder.tick(); // just call tick() to check the state.
+}
 
 void selectProgram(int menuId) {
   id = choosenProgram;
@@ -87,6 +136,21 @@ void goBack(int menuId) {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  button.tick();
+  static int pos = 0;
+  int newPos = encoder.getPosition();
+  if (pos != newPos) {
+    if (pos < newPos)
+      directionEncoder = 1;
+    else
+      directionEncoder = -1;
+    pos = newPos;
+    updateLCD();
+    directionEncoder = 0;
+  }
+  if (buttonFired) {
+    updateLCD();
+    buttonFired = false;
+  }
 
 }

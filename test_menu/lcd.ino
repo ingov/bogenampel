@@ -1,5 +1,9 @@
 void updateLCD() {
   Serial.println("---------");
+  lcd.clear();
+  lcd.home();
+  
+
 
   int parent = 0;             // witch level is selected
   int offset = 0;             // offset, if menu has more entries than LCD-heigh
@@ -12,7 +16,7 @@ void updateLCD() {
   Serial.println(id);
 
 
-  if (buttonfired) {
+  if (buttonFired) {
     // calculate new id and parent to display the correct menu
     for (int i = 0; i < SIZEOF(menuentries); i++) {
       if (menuentries[i].parent == id) {
@@ -26,9 +30,9 @@ void updateLCD() {
   }
 
 
-  // rotation or button occured
-  if (rotation != 0 || buttonfired) {
-    int newId = id + rotation;
+  // directionEncoder or button occured
+  if (directionEncoder != 0 || buttonFired) {
+    int newId = id + directionEncoder;
     // calculate limits prevennt overscoll
     newId = (newId < 1) ? 1 : newId;
     newId = (newId > MAXENTRIES) ? MAXENTRIES : newId;
@@ -42,7 +46,7 @@ void updateLCD() {
       }
     }
     // reset button flag
-    buttonfired = false;
+    buttonFired = false;
   }
 
   int count = 0;
@@ -51,19 +55,24 @@ void updateLCD() {
     // draw only selected leven and only LCD-height count of entries
     if (i > (offset - BLOCKSIZE) && count < BLOCKSIZE && menuentries[i].parent == parent) {
       // arrow or no arrow?
+      lcd.setCursor(0, count);
+
       if (menuentries[i].isEntry) {
         if (menuentries[i].id == id) {
+          lcd.write(LCDML_DISP_cfg_cursor);
           Serial.print("-> ");
         }
         else {
+          lcd.print(" ");
           Serial.print("   ");
         }
 
       }
+      lcd.print(menuentries[i].lable);
       Serial.println(menuentries[i].lable);
       count++;
     }
   }
-  // reset rotation flag
-  rotation = 0;
+  // reset directionEncoder flag
+  directionEncoder = 0;
 }
