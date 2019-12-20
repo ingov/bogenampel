@@ -1,19 +1,22 @@
-void updateLCD() {
+void drawMenu() {
+  if (directionEncoder == -1 && id == 2) {
+    return;
+  }
+
+  
   Serial.println("---------");
   lcd.clear();
   lcd.home();
   
-
-
   int parent = 0;             // witch level is selected
   int offset = 0;             // offset, if menu has more entries than LCD-heigh
   int currentId = id;         // save current id
   bool recalc = false;
   // no arrow in front of blind entries
+  // dirty hack for first Line without Arrow in front
   if (!menuentries[id - 1].isEntry) {
     id++;
   }
-  Serial.println(id);
 
 
   if (buttonFired) {
@@ -70,6 +73,10 @@ void updateLCD() {
       }
       lcd.print(menuentries[i].lable);
       Serial.println(menuentries[i].lable);
+      if (menuentries[i].id == 2) {
+        lcd.print(" ");
+        lcd.print(menuentries[choosenProgram-1].lable);
+      }
       count++;
     }
   }
