@@ -3,8 +3,8 @@ void drawMenu() {
     return;
   }
 
-  
-  Serial.println("---------");
+
+  DEBUG_PRINTLN("---------");
   lcd.clear();
   lcd.home();
   
@@ -63,16 +63,16 @@ void drawMenu() {
       if (menuentries[i].isEntry) {
         if (menuentries[i].id == id) {
           lcd.write(LCDML_DISP_cfg_cursor);
-          Serial.print("-> ");
+          DEBUG_PRINT("-> ");
         }
         else {
           lcd.print(" ");
-          Serial.print("   ");
+          DEBUG_PRINT("   ");
         }
 
       }
       lcd.print(menuentries[i].lable);
-      Serial.println(menuentries[i].lable);
+      DEBUG_PRINTLN(menuentries[i].lable);
       if (menuentries[i].id == 2) {
         lcd.print(" ");
         lcd.print(menuentries[choosenProgram-1].lable);

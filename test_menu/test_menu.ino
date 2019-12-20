@@ -6,11 +6,25 @@
 #include "RotaryEncoder.h"        //rotary encoder library
 #include "Wire.h"
 #include "LiquidCrystal_I2C.h"
+
 #if defined(ARDUINO) && ARDUINO >= 100
 #define printByte(args)  write(args);
 #else
 #define printByte(args)  print(args,BYTE);
 #endif
+/* configure debugging via serial.print */
+//#define DEBUG
+#ifdef DEBUG
+ #define DEBUG_BEGIN(x) Serial.begin(x);
+ #define DEBUG_PRINT(x)  Serial.print(x)
+ #define DEBUG_PRINTLN(x)  Serial.println(x)
+#else
+ #define DEBUG_BEGIN(x)
+ #define DEBUG_PRINT(x)
+ #define DEBUG_PRINTLN(x)
+#endif
+
+
 
 // ***************** LCD settings *************** //
 #define LCDML_DISP_cols 20
@@ -22,12 +36,15 @@
 #define ENCODER_PIN_1  A2
 #define ENCODER_PIN_2  A3
 
+/* helper for "real" sizeof */
 #define SIZEOF(m) (sizeof(m)/sizeof(m[0]))
+/******* menu config BLOCKSIZE is number of rows on lcd MAXENTRIES length of menu ********/
+#define BLOCKSIZE 4
+#define MAXENTRIES 18
+
 int id = 1;
 int directionEncoder = 0;
 bool buttonFired = false;
-#define BLOCKSIZE 4
-#define MAXENTRIES 18
 
 /******* Program settings *********/
 int choosenProgram = 8;
@@ -67,15 +84,16 @@ Menu menuentries [MAXENTRIES] = {
   { 18, 11, setGroup, true, "AB/CD" }
 };
 
+/* special character up Arrow */
 byte upArrow[] = {B00100, B01110, B10101, B00100, B00100, B00100, B00100, B00100};
 
 void setup() {
-  Serial.begin(9600);
+  
+  DEBUG_BEGIN(9600);
 
   lcd.init();
   lcd.backlight();
   lcd.createChar(1, upArrow);
-
 
   // You may have to modify the next 2 lines if using other pins than A2 and A3
   PCICR |= (1 << PCIE1);    // This enables Pin Change Interrupt 1 that covers the Analog input pins or Port C.
@@ -85,17 +103,12 @@ void setup() {
   button.attachClick(buttonClicked);
   // set 80 msec. debouncing time. Default is 50 msec.
   button.setDebounceTicks(80);
-
-  delay(1000);
   drawMenu();
-
 }
 
 ISR(PCINT1_vect) {
   encoder.tick(); // just call tick() to check the state.
 }
-
-
 
 void loop() {
   button.tick();
@@ -105,9 +118,9 @@ void loop() {
   // programm loop
   if (programStartet) {
     lcd.clear();
-    Serial.println(menuentries[choosenProgram - 1].lable);
-    Serial.println(menuentries[choosenGroupSetting - 1].lable);
-    Serial.println(menuentries[choosenTimeSetting - 1].lable);
+    DEBUG_PRINTLN(menuentries[choosenProgram - 1].lable);
+    DEBUG_PRINTLN(menuentries[choosenGroupSetting - 1].lable);
+    DEBUG_PRINTLN(menuentries[choosenTimeSetting - 1].lable);
 
     lcd.print(menuentries[choosenProgram - 1].lable);
     lcd.print(" gestartet");
