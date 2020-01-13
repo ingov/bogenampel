@@ -13,15 +13,15 @@
 #define printByte(args)  print(args,BYTE);
 #endif
 /* configure debugging via serial.print */
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
- #define DEBUG_BEGIN(x) Serial.begin(x);
- #define DEBUG_PRINT(x)  Serial.print(x)
- #define DEBUG_PRINTLN(x)  Serial.println(x)
+#define DEBUG_BEGIN(x) Serial.begin(x);
+#define DEBUG_PRINT(x)  Serial.print(x)
+#define DEBUG_PRINTLN(x)  Serial.println(x)
 #else
- #define DEBUG_BEGIN(x)
- #define DEBUG_PRINT(x)
- #define DEBUG_PRINTLN(x)
+#define DEBUG_BEGIN(x)
+#define DEBUG_PRINT(x)
+#define DEBUG_PRINTLN(x)
 #endif
 
 
@@ -51,6 +51,7 @@ int choosenProgram = 8;
 int choosenTimeSetting = 13;
 int choosenGroupSetting = 18;
 bool programStartet = false;
+int programLaps = 0;
 /******* Program settings *********/
 
 // LCD setup
@@ -83,12 +84,13 @@ Menu menuentries [MAXENTRIES] = {
   { 17, 11, setGroup, true, "AB" },
   { 18, 11, setGroup, true, "AB/CD" }
 };
+char groups[2] = "AC";
+
 
 /* special character up Arrow */
-byte upArrow[] = {B00100, B01110, B10101, B00100, B00100, B00100, B00100, B00100};
-
+byte upArrow[] = {B00100, B01110, B10101, B00100, B00100, B00100, B00100, B00000};
 void setup() {
-  
+
   DEBUG_BEGIN(9600);
 
   lcd.init();
@@ -128,6 +130,10 @@ void loop() {
     lcd.print(menuentries[choosenGroupSetting - 1].lable);
     lcd.print(" ");
     lcd.print(menuentries[choosenTimeSetting - 1].lable);
+    lcd.setCursor(10, 1);
+    lcd.print("Runde: ");
+    lcd.print(programLaps+1);
+
     lcd.setCursor(0, 2);
     lcd.print("Weiter  Pause  Stop");
 
@@ -170,17 +176,29 @@ void loop() {
       }
 
       if (buttonFired) {
-        lcd.setCursor(0, 3);
-        lcd.print("send stop signal...");
-        lcd.print(chooser);
-        //noInterrupts();
-        delay(2000);
-        //interrupts();
-        
-        buttonFired = false;
-        programStartet = false;
-        id = 4;
-        drawMenu();
+          buttonFired = false;
+
+        if (chooser == 0) {
+          programLaps++;
+          lcd.setCursor(10, 1);
+          lcd.print("Runde: ");
+          lcd.print(programLaps+1);
+          sendToClinet();
+        }
+        else {
+          lcd.setCursor(0, 3);
+          lcd.print("send stop signal...");
+          lcd.print(chooser);
+          //noInterrupts();
+          delay(2000);
+          //interrupts();
+
+          programStartet = false;
+          programLaps = 0;
+          id = 4;
+          drawMenu();
+
+        }
       }
     }
   }
