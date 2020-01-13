@@ -89,7 +89,7 @@ Menu menuentries [MAXENTRIES] = {
   { 12, 3, setGroup, noFunc, true, false, "Gruppen" },
   { 13, 3, goBack, noFunc, true, false, "zuruek" },
   { 14, 10, setTime, timeTrigger, true,  true, "Zeit pro Gruppe"},
-  { 15, 11, setPreShootTime, preShotTrigger, true,  true, "RotphaseX"},
+  { 15, 11, setPreShootTime, preShotTrigger, true,  true, "Zeit vor Start"},
   { 16, 12, setGroup, noFunc, true, false, "AB" },
   { 17, 12, setGroup, noFunc, true, false, "AB/CD" }
 };
