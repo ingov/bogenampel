@@ -33,7 +33,7 @@ void preShotTrigger() {
   if (directionEncoder == 1 && preShootSetting < preShootSettingMax) {
     preShootSetting += preShootSettingStep;
   }
-  else if (directionEncoder == -1 && preShootSetting > 1) {
+  else if (directionEncoder == -1 && preShootSetting > 0) {
     preShootSetting -= preShootSettingStep;
   }
   if (directionEncoder == 0) {
@@ -98,7 +98,7 @@ bool sendToClinet(int mode) {
   String txData;
   DEBUG_PRINTLN(programLaps);
   if (mode == 0) {
-    txData = String(groups[programLaps % 2]);
+    txData = String(groups[(programLaps + groupCounter % 2) % 2]);
     char formatter3[3];
     char formatter2[2];
     sprintf(formatter3, "%03d", timeSetting);

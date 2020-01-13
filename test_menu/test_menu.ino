@@ -48,15 +48,16 @@ bool buttonFired = false;
 int choosenProgram = 5;
 int choosenTimeSetting = 14;
 int choosenPreShootSetting = 15;
-int timeSetting=10; // test for time
+int timeSetting = 10; // test for time
 int timeSettingMax = 120;
 int timeSettingStep = 10;
-int preShootSetting=10; // test for time
+int preShootSetting = 10; // test for time
 int preShootSettingMax = 10;
 int preShootSettingStep = 1;
 int choosenGroupSetting = 17;
 bool programStartet = false;
 int programLaps = 0;
+int groupCounter = 0;
 /******* Program settings *********/
 
 // RF24 setup
@@ -142,13 +143,15 @@ void loop() {
     DEBUG_PRINTLN(timeSetting);
 
     lcd.print(menuentries[choosenProgram - 1].lable);
-    lcd.print(" gestartet");
-    lcd.setCursor(0, 1);
-    lcd.print(menuentries[choosenGroupSetting - 1].lable);
     lcd.print(" ");
+    lcd.print(menuentries[choosenGroupSetting - 1].lable);
+    lcd.setCursor(0, 1);
+    lcd.print("Zeit ");
     lcd.print(timeSetting);
-    lcd.setCursor(10, 1);
-    lcd.print("Runde: ");
+    lcd.setCursor(9, 1);
+    lcd.print((groups[(programLaps + groupCounter % 2) % 2] == 'A') ? "AB" : "CD" );
+    lcd.setCursor(12, 1);
+    lcd.print("Runde ");
     lcd.print(programLaps + 1);
 
     lcd.setCursor(0, 2);
@@ -196,12 +199,17 @@ void loop() {
         buttonFired = false;
 
         if (chooser == 0) {
+          // toggle groups (ab/cd/cd/ab/ab/cd...)
+          if (programLaps % 2) {
+            groupCounter++;
+          }
           programLaps++;
           if (sendToClinet(chooser)) {
-            
-            lcd.setCursor(10, 1);
-            lcd.print("Runde: ");
-            lcd.print(programLaps+1);
+            lcd.setCursor(9, 1);
+            lcd.print((groups[(programLaps + groupCounter % 2) % 2] == 'A') ? "AB" : "CD");
+            lcd.setCursor(12, 1);
+            lcd.print("Runde ");
+            lcd.print(programLaps + 1);
           }
           else {
             programLaps--;
@@ -213,11 +221,12 @@ void loop() {
           lcd.print("send stop signal...");
           lcd.print(chooser);
           //noInterrupts();
-          delay(2000);
+          delay(800);
           //interrupts();
 
           programStartet = false;
           programLaps = 0;
+          groupCounter = 0;
           id = 4;
           drawMenu();
 
@@ -238,5 +247,4 @@ void loop() {
     drawMenu();
     buttonFired = false;
   }
-
 }
