@@ -5,19 +5,17 @@
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
-
-Menu	KEYWORD1	Menu
-
+Menu KEYWORD1
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
-execute	KEYWORD2
+execute KEYWORD2
+executeRotary KEYWORD2
 noFunc KEYWORD2
 parent KEYWORD2
 lable KEYWORD2
-callBack KEYWORD2
 isEntry KEYWORD2
-
+disableScroll KEYWORD2
 #######################################
 # Constants (LITERAL1)
 #######################################

@@ -23,6 +23,8 @@
 #define DEBUG_PRINT(x)
 #define DEBUG_PRINTLN(x)
 #endif
+/* helper for "real" sizeof */
+#define SIZEOF(m) (sizeof(m)/sizeof(m[0]))
 
 
 
@@ -30,29 +32,36 @@
 #define LCDML_DISP_cols 20
 #define LCDML_DISP_rows 4
 #define LCDML_DISP_cfg_cursor 0x7E   // cursor Symbol
-
 // ***************** rotary encoder *************** //
 #define ENCODER_PIN_B  A1
 #define ENCODER_PIN_1  A2
 #define ENCODER_PIN_2  A3
-
-/* helper for "real" sizeof */
-#define SIZEOF(m) (sizeof(m)/sizeof(m[0]))
 /******* menu config BLOCKSIZE is number of rows on lcd MAXENTRIES length of menu ********/
 #define BLOCKSIZE 4
-#define MAXENTRIES 18
+#define MAXENTRIES 17
 
 int id = 1;
 int directionEncoder = 0;
 bool buttonFired = false;
 
 /******* Program settings *********/
-int choosenProgram = 8;
-int choosenTimeSetting = 13;
-int choosenGroupSetting = 18;
+int choosenProgram = 5;
+int choosenTimeSetting = 14;
+int choosenPreShootSetting = 15;
+int timeSetting=10; // test for time
+int timeSettingMax = 120;
+int timeSettingStep = 10;
+int preShootSetting=10; // test for time
+int preShootSettingMax = 10;
+int preShootSettingStep = 1;
+int choosenGroupSetting = 17;
 bool programStartet = false;
 int programLaps = 0;
 /******* Program settings *********/
+
+// RF24 setup
+RF24 radio(6, 7); // Hardware Konfiguration: RF24L01 Modul
+byte addresses[][6] = {"BATV10", "BARV10"}; // Device Address Transmitter/Receiver
 
 // LCD setup
 LiquidCrystal_I2C lcd(0x27, LCDML_DISP_cols, LCDML_DISP_rows);
@@ -63,26 +72,26 @@ RotaryEncoder encoder(ENCODER_PIN_1, ENCODER_PIN_2);
 // Setup a new OneButton on pin A1.
 OneButton button(ENCODER_PIN_B, true);
 
+
 // represents the Menu-structure
 Menu menuentries [MAXENTRIES] = {
-  { 1, 0, noFunc, false, "Hauptmenu" },
-  { 2, 0, selectProgram, true, "Program" },
-  { 3, 0, noFunc, true, "Program Einstellung" },
-  { 4, 0, startSession, true, "Program starten" },
-  { 5, 2, setProgram, true, "Program 1" },
-  { 6, 2, setProgram, true, "Program 2" },
-  { 7, 2, setProgram, true, "Program 3" },
-  { 8, 2, setProgram, true, "Program 4" },
-  { 9, 2, setProgram, true, "Program 5" },
-  { 10, 3, setTime, true, "Zeiteinstellung" },
-  { 11, 3, setGroup, true, "Gruppen" },
-  { 12, 3, goBack, true, "zuruek" },
-  { 13, 10, setTime, true, "60" },
-  { 14, 10, setTime, true, "120" },
-  { 15, 10, setTime, true, "180" },
-  { 16, 10, setTime, true, "240" },
-  { 17, 11, setGroup, true, "AB" },
-  { 18, 11, setGroup, true, "AB/CD" }
+  { 1, 0, noFunc, noFunc, false, false, "Hauptmenu"},
+  { 2, 0, selectProgram, noFunc, true, false, "Program" },
+  { 3, 0, noFunc, noFunc, true, false, "Program Einstellung" },
+  { 4, 0, startSession, noFunc, true, false, "Program starten" },
+  { 5, 2, setProgram, noFunc, true, false, "Program 1" },
+  { 6, 2, setProgram, noFunc, true, false, "Program 2" },
+  { 7, 2, setProgram, noFunc, true, false, "Program 3" },
+  { 8, 2, setProgram, noFunc, true, false, "Program 4" },
+  { 9, 2, setProgram, noFunc, true, false, "Program 5" },
+  { 10, 3, setTime, timeTrigger, true, false, "Zeiteinstellung" },
+  { 11, 3, setPreShootTime, preShotTrigger, true, false, "Rotphase" },
+  { 12, 3, setGroup, noFunc, true, false, "Gruppen" },
+  { 13, 3, goBack, noFunc, true, false, "zuruek" },
+  { 14, 10, setTime, timeTrigger, true,  true, "Zeit pro Gruppe"},
+  { 15, 11, setPreShootTime, preShotTrigger, true,  true, "RotphaseX"},
+  { 16, 12, setGroup, noFunc, true, false, "AB" },
+  { 17, 12, setGroup, noFunc, true, false, "AB/CD" }
 };
 char groups[2] = "AC";
 
@@ -90,8 +99,16 @@ char groups[2] = "AC";
 /* special character up Arrow */
 byte upArrow[] = {B00100, B01110, B10101, B00100, B00100, B00100, B00100, B00000};
 void setup() {
-
   DEBUG_BEGIN(9600);
+
+  // init RF24
+  radio.begin();
+  radio.setAutoAck(true);
+  radio.setPALevel(RF24_PA_LOW); // set transmiter power
+  radio.openWritingPipe(addresses[0]);
+  radio.openReadingPipe(1, addresses[1]);
+  radio.stopListening();
+
 
   lcd.init();
   lcd.backlight();
@@ -122,17 +139,17 @@ void loop() {
     lcd.clear();
     DEBUG_PRINTLN(menuentries[choosenProgram - 1].lable);
     DEBUG_PRINTLN(menuentries[choosenGroupSetting - 1].lable);
-    DEBUG_PRINTLN(menuentries[choosenTimeSetting - 1].lable);
+    DEBUG_PRINTLN(timeSetting);
 
     lcd.print(menuentries[choosenProgram - 1].lable);
     lcd.print(" gestartet");
     lcd.setCursor(0, 1);
     lcd.print(menuentries[choosenGroupSetting - 1].lable);
     lcd.print(" ");
-    lcd.print(menuentries[choosenTimeSetting - 1].lable);
+    lcd.print(timeSetting);
     lcd.setCursor(10, 1);
     lcd.print("Runde: ");
-    lcd.print(programLaps+1);
+    lcd.print(programLaps + 1);
 
     lcd.setCursor(0, 2);
     lcd.print("Weiter  Pause  Stop");
@@ -176,16 +193,22 @@ void loop() {
       }
 
       if (buttonFired) {
-          buttonFired = false;
+        buttonFired = false;
 
         if (chooser == 0) {
           programLaps++;
-          lcd.setCursor(10, 1);
-          lcd.print("Runde: ");
-          lcd.print(programLaps+1);
-          sendToClinet();
+          if (sendToClinet(chooser)) {
+            
+            lcd.setCursor(10, 1);
+            lcd.print("Runde: ");
+            lcd.print(programLaps+1);
+          }
+          else {
+            programLaps--;
+          }
         }
         else {
+          sendToClinet(chooser);
           lcd.setCursor(0, 3);
           lcd.print("send stop signal...");
           lcd.print(chooser);

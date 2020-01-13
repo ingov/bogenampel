@@ -4,9 +4,6 @@ void drawMenu() {
   }
 
 
-  DEBUG_PRINTLN("---------");
-  lcd.clear();
-  lcd.home();
   
   int parent = 0;             // witch level is selected
   int offset = 0;             // offset, if menu has more entries than LCD-heigh
@@ -31,6 +28,14 @@ void drawMenu() {
     // execute menu function
     menuentries[currentId - 1].execute();
   }
+
+  if (menuentries[id - 1].disableScroll) {
+    menuentries[currentId - 1].executeRotary();
+    return;
+  }
+
+  DEBUG_PRINTLN("---------");
+  lcd.clear();
 
 
   // directionEncoder or button occured
