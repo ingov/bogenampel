@@ -40,6 +40,13 @@
 #define BLOCKSIZE 4
 #define MAXENTRIES 17
 
+const int chipSelect = 4;
+// set up variables using the SD utility library functions:
+//Sd2Card card;
+//SdVolume volume;
+//SdFile root;
+
+
 int id = 1;
 int directionEncoder = 0;
 bool buttonFired = false;
@@ -102,6 +109,8 @@ byte upArrow[] = {B00100, B01110, B10101, B00100, B00100, B00100, B00100, B00000
 void setup() {
   DEBUG_BEGIN(9600);
 
+
+  
   // init RF24
   radio.begin();
   radio.setAutoAck(true);

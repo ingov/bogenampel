@@ -89,6 +89,4 @@ void switchLED(char mode) {
       ledIsOn = false;
       break;
   }
-
-
 }
