@@ -37,7 +37,6 @@ void drawMenu() {
   DEBUG_PRINTLN("---------");
   lcd.clear();
 
-
   // directionEncoder or button occured
   if (directionEncoder != 0 || buttonFired) {
     int newId = id + directionEncoder;
