@@ -1,4 +1,4 @@
-#include <Menu.h>
+#include "Menu.h"
 #include "SPI.h"
 #include "nRF24L01.h"             //RF24 library
 #include "RF24.h"                 //RF24 library
@@ -6,6 +6,8 @@
 #include "RotaryEncoder.h"        //rotary encoder library
 #include "Wire.h"
 #include "LiquidCrystal_I2C.h"
+#include "SD.h"
+
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #define printByte(args)  write(args);
@@ -34,17 +36,17 @@
 #define LCDML_DISP_cfg_cursor 0x7E   // cursor Symbol
 // ***************** rotary encoder *************** //
 #define ENCODER_PIN_B  A1
-#define ENCODER_PIN_1  A2
-#define ENCODER_PIN_2  A3
+#define ENCODER_PIN_1  A8
+#define ENCODER_PIN_2  A9
 /******* menu config BLOCKSIZE is number of rows on lcd MAXENTRIES length of menu ********/
 #define BLOCKSIZE 4
 #define MAXENTRIES 17
 
-const int chipSelect = 4;
+const int chipSelect = 10;
 // set up variables using the SD utility library functions:
-//Sd2Card card;
-//SdVolume volume;
-//SdFile root;
+Sd2Card card;
+SdVolume volume;
+SdFile root;
 
 
 int id = 1;
@@ -109,7 +111,15 @@ byte upArrow[] = {B00100, B01110, B10101, B00100, B00100, B00100, B00100, B00000
 void setup() {
   DEBUG_BEGIN(9600);
 
-
+  if (!card.init(SPI_HALF_SPEED, chipSelect)) {
+    Serial.println("initialization failed. Things to check:");
+    Serial.println("* is a card inserted?");
+    Serial.println("* is your wiring correct?");
+    Serial.println("* did you change the chipSelect pin to match your shield or module?");
+    while (1);
+  } else {
+    Serial.println("Wiring is correct and a card is present.");
+  }
   
   // init RF24
   radio.begin();
@@ -125,8 +135,8 @@ void setup() {
   lcd.createChar(1, upArrow);
 
   // You may have to modify the next 2 lines if using other pins than A2 and A3
-  PCICR |= (1 << PCIE1);    // This enables Pin Change Interrupt 1 that covers the Analog input pins or Port C.
-  PCMSK1 |= (1 << PCINT10) | (1 << PCINT11);  // This enables the interrupt for pin 2 and 3 of Port C.
+  PCMSK2 |= (1 << PCINT16) | (1 << PCINT17);  // This enables the interrupt for pin A8 and A9 of Port C.
+  PCICR |= (1 << PCIE2);    // This enables Pin Change Interrupt 1 that covers the Analog input pins or Port C.
 
   // setup button
   button.attachClick(buttonClicked);
@@ -135,7 +145,7 @@ void setup() {
   drawMenu();
 }
 
-ISR(PCINT1_vect) {
+ISR (PCINT2_vect) {
   encoder.tick(); // just call tick() to check the state.
 }
 
