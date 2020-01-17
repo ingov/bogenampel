@@ -26,8 +26,6 @@
 /* helper for "real" sizeof */
 #define SIZEOF(m) (sizeof(m)/sizeof(m[0]))
 
-
-
 // ***************** LCD settings *************** //
 #define LCDML_DISP_cols 20
 #define LCDML_DISP_rows 4
@@ -40,12 +38,9 @@
 #define BLOCKSIZE 4
 #define MAXENTRIES 17
 
-const int chipSelect = 4;
-// set up variables using the SD utility library functions:
-//Sd2Card card;
-//SdVolume volume;
-//SdFile root;
-
+// i2c address for master-slave communication
+#define SLAVE_ADDRESS 0x04
+#define CONFIG_SIZE 10
 
 int id = 1;
 int directionEncoder = 0;
@@ -83,13 +78,13 @@ OneButton button(ENCODER_PIN_B, true);
 
 // represents the Menu-structure
 Menu menuentries [MAXENTRIES] = {
-  { 1, 0, noFunc, noFunc, false, false, "Hauptmenu"},
+  { 1, 0, noFunc, noFunc, false, false, "Bogenampel V1.0"},
   { 2, 0, selectProgram, noFunc, true, false, "Program" },
   { 3, 0, noFunc, noFunc, true, false, "Program Einstellung" },
   { 4, 0, startSession, noFunc, true, false, "Program starten" },
-  { 5, 2, setProgram, noFunc, true, false, "Program 1" },
-  { 6, 2, setProgram, noFunc, true, false, "Program 2" },
-  { 7, 2, setProgram, noFunc, true, false, "Program 3" },
+  { 5, 0, noFunc, noFunc, true, false, "Speichern" },
+  { 6, 2, setProgram, noFunc, true, false, "Program 1" },
+  { 7, 2, setProgram, noFunc, true, false, "Program 2" },
   { 8, 2, setProgram, noFunc, true, false, "Program 4" },
   { 9, 2, setProgram, noFunc, true, false, "Program 5" },
   { 10, 3, setTime, timeTrigger, true, false, "Zeiteinstellung" },
@@ -109,8 +104,11 @@ byte upArrow[] = {B00100, B01110, B10101, B00100, B00100, B00100, B00100, B00000
 void setup() {
   DEBUG_BEGIN(9600);
 
+  // start wire for arduino2arduino communication
+  Wire.begin();
 
-  
+  loadConfigFromSlave();
+
   // init RF24
   radio.begin();
   radio.setAutoAck(true);
@@ -256,4 +254,22 @@ void loop() {
     drawMenu();
     buttonFired = false;
   }
+}
+
+void loadConfigFromSlave() {
+  long start = millis();
+  String data;
+
+  Wire.requestFrom(SLAVE_ADDRESS, CONFIG_SIZE);
+  while (Wire.available())  {
+    char character = Wire.read();
+    data += character;
+  }
+  if (data && data.substring(0,1).equals("P")) {
+    choosenProgram = data.substring(1,3).toInt();
+  }
+  DEBUG_PRINT("got Configuration: ");
+  DEBUG_PRINT(data);
+  DEBUG_PRINT(" ms: ");
+  DEBUG_PRINTLN(millis() - start);
 }
