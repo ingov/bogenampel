@@ -1,11 +1,11 @@
 #include <Menu.h>
-#include "SPI.h"
-#include "nRF24L01.h"             //RF24 library
-#include "RF24.h"                 //RF24 library
-#include "OneButton.h"            //button library
-#include "RotaryEncoder.h"        //rotary encoder library
-#include "Wire.h"
-#include "LiquidCrystal_I2C.h"
+#include <SPI.h>
+#include <nRF24L01.h>             //RF24 library
+#include <RF24.h>                 //RF24 library
+#include <OneButton.h>            //button library
+#include <RotaryEncoder.h>        //rotary encoder library
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #define printByte(args)  write(args);
@@ -26,8 +26,6 @@
 /* helper for "real" sizeof */
 #define SIZEOF(m) (sizeof(m)/sizeof(m[0]))
 
-
-
 // ***************** LCD settings *************** //
 #define LCDML_DISP_cols 20
 #define LCDML_DISP_rows 4
@@ -38,7 +36,11 @@
 #define ENCODER_PIN_2  A3
 /******* menu config BLOCKSIZE is number of rows on lcd MAXENTRIES length of menu ********/
 #define BLOCKSIZE 4
-#define MAXENTRIES 17
+#define MAXENTRIES 18
+
+// i2c address for master-slave communication
+#define SLAVE_ADDRESS 0x04
+#define CONFIG_SIZE 10
 
 int id = 1;
 int directionEncoder = 0;
@@ -46,8 +48,8 @@ bool buttonFired = false;
 
 /******* Program settings *********/
 int choosenProgram = 5;
-int choosenTimeSetting = 14;
-int choosenPreShootSetting = 15;
+int choosenTimeSetting = 15;
+int choosenPreShootSetting = 16;
 int timeSetting = 10; // test for time
 int timeSettingMax = 120;
 int timeSettingStep = 10;
@@ -75,10 +77,10 @@ OneButton button(ENCODER_PIN_B, true);
 
 
 // represents the Menu-structure
-Menu menuentries [MAXENTRIES] = {
-  { 1, 0, noFunc, noFunc, false, false, "Hauptmenu"},
+const Menu menuentries [MAXENTRIES] = {
+  { 1, 0, noFunc, noFunc, false, false, "Bogenampel V1.0"},
   { 2, 0, selectProgram, noFunc, true, false, "Program" },
-  { 3, 0, noFunc, noFunc, true, false, "Program Einstellung" },
+  { 3, 0, noFunc, noFunc, true, false, "Einstellungen" },
   { 4, 0, startSession, noFunc, true, false, "Program starten" },
   { 5, 2, setProgram, noFunc, true, false, "Program 1" },
   { 6, 2, setProgram, noFunc, true, false, "Program 2" },
@@ -88,11 +90,12 @@ Menu menuentries [MAXENTRIES] = {
   { 10, 3, setTime, timeTrigger, true, false, "Zeiteinstellung" },
   { 11, 3, setPreShootTime, preShotTrigger, true, false, "Rotphase" },
   { 12, 3, setGroup, noFunc, true, false, "Gruppen" },
-  { 13, 3, goBack, noFunc, true, false, "zuruek" },
-  { 14, 10, setTime, timeTrigger, true,  true, "Zeit pro Gruppe"},
-  { 15, 11, setPreShootTime, preShotTrigger, true,  true, "Zeit vor Start"},
-  { 16, 12, setGroup, noFunc, true, false, "AB" },
-  { 17, 12, setGroup, noFunc, true, false, "AB/CD" }
+  { 13, 3, saveSettings, noFunc, true, false, "Speichern" },
+  { 14, 3, goBack, noFunc, true, false, "zuruek" },
+  { 15, 10, setTime, timeTrigger, true,  true, "Zeit pro Gruppe"},
+  { 16, 11, setPreShootTime, preShotTrigger, true,  true, "Zeit vor Start"},
+  { 17, 12, setGroup, noFunc, true, false, "AB" },
+  { 18, 12, setGroup, noFunc, true, false, "AB/CD" }
 };
 char groups[2] = "AC";
 
@@ -101,6 +104,11 @@ char groups[2] = "AC";
 byte upArrow[] = {B00100, B01110, B10101, B00100, B00100, B00100, B00100, B00000};
 void setup() {
   DEBUG_BEGIN(9600);
+
+  // start wire for arduino2arduino communication
+  Wire.begin();
+
+  loadConfigFromSlave();
 
   // init RF24
   radio.begin();

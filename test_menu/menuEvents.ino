@@ -90,6 +90,11 @@ void goBack(int menuId) {
   id = menuentries[menuId - 1].parent;
 }
 
+void saveSettings(int menuId) {
+  saveConfigToSlave();
+  id = 3;
+}
+
 void startSession(int menuId) {
   programStartet = sendToClinet(0);
 }
