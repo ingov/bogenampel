@@ -1,155 +1,89 @@
-String menu[] = {"Program: ", "Program aendern", "Program starten"};
-String programme[] = {"WA 18/3", "WA 30/60/90", "WA 0815", "WA ..."};
-String settings[] = {"Zeit", "Gruppen", "Runden", "zuruek"};
-String startOptions[] = {"Weiter", "Stop"};
-String gruppen[] = {"AB", "AB/CD"};
+void drawMenu() {
+  if (directionEncoder == -1 && id == 2) {
+    return;
+  }
 
-int menuSelection = 0;
-int program = 0;
-int setting = 0;
-int startoption = 0;
-int gruppe = 0;
 
-int currentPointer = 0;
+  
+  int parent = 0;             // witch level is selected
+  int offset = 0;             // offset, if menu has more entries than LCD-heigh
+  int currentId = id;         // save current id
+  bool recalc = false;
+  // no arrow in front of blind entries
+  // dirty hack for first Line without Arrow in front
+  if (!menuentries[id - 1].isEntry) {
+    id++;
+  }
 
-int menuCount = 3;
-int programCount = 4;
-int settingsCount = 4;
-int startOptionsCount = 2;
-int gruppenCount = 2;
 
-void updateLcd() {
   if (buttonFired) {
-
-  }
-  int maxEntries = 0;
-  switch (menuSelection) {
-    case 0:
-      maxEntries = menuCount;
-      if (buttonFired) {
-        menuSelection = currentPointer + 1;
-        currentPointer = 0;
+    // calculate new id and parent to display the correct menu
+    for (int i = 0; i < SIZEOF(menuentries); i++) {
+      if (menuentries[i].parent == id) {
+        parent = menuentries[i].parent;
+        id = menuentries[i].id;
+        break;
       }
-      break;
-    case 1:
-      maxEntries = programCount;
-      if (buttonFired) {
-        program = currentPointer;
-        menuSelection = 0;
-        currentPointer = 0;
-      }
-      break;
-    case 2:
-      maxEntries = settingsCount;
-      if (buttonFired) {
-        switch (currentPointer) {
-          case 0:
-            // zeit
-            break;
-          case 1:
-            menuSelection = 4;
-            currentPointer = 0;
-            break;
-          case 2:
-            // runden
-            break;
-          case 3:
-            menuSelection = 0;
-            currentPointer = 1;
-            break;
-        }
-      }
-      break;
-    case 3:
-      Serial.println("case3");
-      maxEntries = startOptionsCount;
-      break;
-    case 4:
-      if (buttonFired) {
-        gruppe = currentPointer + 1;
-        currentPointer = 1;
-        menuSelection = 2;
-      }
-      maxEntries = startOptionsCount;
-      break;
+    }
+    // execute menu function
+    menuentries[currentId - 1].execute();
   }
 
-  if (directionEncoder == 1) {
-    currentPointer ++;
-    if (currentPointer == maxEntries)
-      currentPointer = 0;
+  if (menuentries[id - 1].disableScroll) {
+    menuentries[currentId - 1].executeRotary();
+    return;
   }
-  else if (directionEncoder == 2) {
-    currentPointer --;
-    if (currentPointer < 0)
-      currentPointer = maxEntries - 1;
-  }
-  drawLcd();
-  Serial.print("currentPointer: ");
-  Serial.println(currentPointer);
 
-
-}
-
-void drawLcd() {
+  DEBUG_PRINTLN("---------");
   lcd.clear();
-  switch (menuSelection) {
-    case 0:
-      for (int i = 0; i < menuCount; i++) {
-        lcd.setCursor(0, i);
-        if (i == currentPointer)
-          lcd.write(_LCDML_DISP_cfg_cursor);
-        else
-          lcd.print(" ");
-        lcd.print(menu[i]);
-        if (i == 0)
-          lcd.print(programme[program]);
-      }
-      break;
-    case 1:
-      for (int i = 0; i < programCount; i++) {
-        lcd.setCursor(0, i);
-        if (i == currentPointer)
-          lcd.write(_LCDML_DISP_cfg_cursor);
-        else
-          lcd.print(" ");
-        lcd.print(programme[i]);
-      }
-      break;
-    case 2:
-      for (int i = 0; i < settingsCount; i++) {
-        lcd.setCursor(0, i);
-        if (i == currentPointer)
-          lcd.write(_LCDML_DISP_cfg_cursor);
-        else
-          lcd.print(" ");
-        lcd.print(settings[i]);
-      }
-      break;
-    case 3:
-        lcd.setCursor(0, 0);
-        lcd.print(programme[program]);
-        lcd.setCursor(0, 1);
-        lcd.print(gruppen[gruppe]);
 
-      for (int i = 0; i < startOptionsCount; i++) {
-        lcd.setCursor(0, i+2);
-        if (i == currentPointer)
-          lcd.write(_LCDML_DISP_cfg_cursor);
-        else
-          lcd.print(" ");
-        lcd.print(startOptions[i]);
+  // directionEncoder or button occured
+  if (directionEncoder != 0 || buttonFired) {
+    int newId = id + directionEncoder;
+    // calculate limits prevennt overscoll
+    newId = (newId < 1) ? 1 : newId;
+    newId = (newId > MAXENTRIES) ? MAXENTRIES : newId;
+    id = (menuentries[id - 1].parent == menuentries[newId - 1].parent) ? newId : id;
+    // also calculate the offset
+    for (int i = 0; i < SIZEOF(menuentries); i++) {
+      if (menuentries[i].id == id) {
+        parent = menuentries[i].parent;
+        offset = i;
+        break;
       }
-      break;
-    case 4:
-      for (int i = 0; i < gruppenCount; i++) {
-        lcd.setCursor(0, i);
-        if (i == currentPointer)
-          lcd.write(_LCDML_DISP_cfg_cursor);
-        else
-          lcd.print(" ");
-        lcd.print(gruppen[i]);
-      }
-      break;
+    }
+    // reset button flag
+    buttonFired = false;
   }
+
+  int count = 0;
+  // draw menu
+  for (int i = 0; i < SIZEOF(menuentries); i++) {
+    // draw only selected leven and only LCD-height count of entries
+    if (i > (offset - BLOCKSIZE) && count < BLOCKSIZE && menuentries[i].parent == parent) {
+      // arrow or no arrow?
+      lcd.setCursor(0, count);
+
+      if (menuentries[i].isEntry) {
+        if (menuentries[i].id == id) {
+          lcd.write(LCDML_DISP_cfg_cursor);
+          DEBUG_PRINT("-> ");
+        }
+        else {
+          lcd.print(" ");
+          DEBUG_PRINT("   ");
+        }
+
+      }
+      lcd.print(menuentries[i].lable);
+      DEBUG_PRINTLN(menuentries[i].lable);
+      if (menuentries[i].id == 2) {
+        lcd.print(" ");
+        lcd.print(menuentries[choosenProgram-1].lable);
+      }
+      count++;
+    }
+  }
+  // reset directionEncoder flag
+  directionEncoder = 0;
 }
