@@ -1,3 +1,8 @@
 Multi send +ack
 https://forum.arduino.cc/index.php?topic=520515.0
 https://forum.arduino.cc/index.php?topic=421081
+
+
+https://forum.arduino.cc/index.php?topic=360718.15
+
+http://old2.0x0001.de/hacks/hardwarehack-buskonflikt-durch-lowcost-sdcard-modul-spi/
