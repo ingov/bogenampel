@@ -13,13 +13,13 @@ void initUi() {
   }
   setLight('R', blinkMode);
   counterDisplay.showNumberDec(preShootTime, false);
-  startTone(800, 1000);
+  startTone(NOTE_C4, 1000);
 }
 
 void exitUi() {
   DEBUG_PRINTLN("STOP");
   setLight('R', true);
-  startTone(800, 800, 400);
+  startTone(NOTE_C4, 800, 400);
 }
 
 void updateUi() {
@@ -29,7 +29,7 @@ void updateUi() {
   }
   if (secondsToRun == timeOutForYellow) {
     setLight('Y', false);
-    startTone(2000, 200);
+    startTone(NOTE_D5, 200);
   }
 
 
@@ -68,7 +68,7 @@ void setLight(char code, bool doBlink) {
 void switchLED(char mode) {
   digitalWrite(RED_PIN, LOW);
   digitalWrite(GREEN_PIN, LOW);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(YELLOW_PIN, LOW);
   ledIsOn = true;
   switch (mode) {
     case 'R':
@@ -81,8 +81,7 @@ void switchLED(char mode) {
       break;
     case 'Y':
       DEBUG_PRINTLN("switch y");
-      digitalWrite(RED_PIN, HIGH);
-      digitalWrite(GREEN_PIN, HIGH);
+      digitalWrite(YELLOW_PIN, HIGH);
       break;
     default:
       DEBUG_PRINTLN("switch default");

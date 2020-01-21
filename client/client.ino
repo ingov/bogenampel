@@ -2,6 +2,9 @@
 #include "RF24.h"                 //RF24 library
 #include <TM1637Display.h>
 
+#define NOTE_E6  1319
+
+
 #if defined(ARDUINO) && ARDUINO >= 100
 #define printByte(args)  write(args);
 #else
@@ -29,7 +32,7 @@
 // LED setup
 #define RED_PIN 8
 #define GREEN_PIN 9
-#define BLUE_PIN 10
+#define YELLOW_PIN 10
 
 // RF24 setup
 RF24 radio(6, 7); // Hardware Konfiguration: RF24L01 Modul
@@ -98,7 +101,7 @@ void setup() {
 
   pinMode(RED_PIN, OUTPUT);
   pinMode(GREEN_PIN, OUTPUT);
-  pinMode(BLUE_PIN, OUTPUT);
+  pinMode(YELLOW_PIN, OUTPUT);
 
   DEBUG_PRINTLN("Client Up");
   initUi();
@@ -135,7 +138,7 @@ void loop() {
     else {
       if (switchToGreen) {
         setLight('G', false);
-        startTone(1200, 500);
+        startTone(NOTE_E6, 500);
         switchToGreen = false;
       }
       if (secondsToRun == 0) {
