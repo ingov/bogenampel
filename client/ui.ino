@@ -27,7 +27,7 @@ void updateUi() {
   if (preShootTime != 0) {
     displayValue = preShootTime;
   }
-  if (secondsToRun == timeOutForYellow) {
+  if (secondsToRun == yellowLEDTime) {
     setLight('Y', false);
     startTone(NOTE_D5, 200);
   }

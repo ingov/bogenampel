@@ -50,26 +50,55 @@ void preShotTrigger() {
 }
 
 void setTime(int menuId) {
-  if (menuId == 10) {
+  if (menuId == 11) {
     id = choosenTimeSetting;
   }
   else {
     choosenTimeSetting = menuId;
-    id = 10;
+    id = 11;
   }
 }
 void setPreShootTime(int menuId) {
-  if (menuId == 11) {
+  if (menuId == 10) {
     id = choosenPreShootSetting;
   }
   else {
     choosenPreShootSetting = menuId;
-    id = 11;
+    id = 10;
+  }
+}
+
+void yellowLEDTrigger() {
+   if (directionEncoder == 1 && yellowLEDSetting < yellowLEDSettingMax) {
+    yellowLEDSetting += yellowLEDSettingStep;
+  }
+  else if (directionEncoder == -1 && yellowLEDSetting > 5) {
+    yellowLEDSetting -= yellowLEDSettingStep;
+  }
+  if (directionEncoder == 0) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(menuentries[id - 1].lable);
+    lcd.setCursor(0, 1);
+    lcd.print(yellowLEDSetting);
+  }
+  lcd.setCursor(0, 1);
+  lcd.print(yellowLEDSetting);
+  lcd.print("  ");
+ 
+}
+void setYellowLEDTime(int menuId){
+    if (menuId == 12) {
+    id = choosenYellowLEDSetting;
+  }
+  else {
+    choosenYellowLEDSetting = menuId;
+    id = 12;
   }
 }
 
 void setGroup(int menuId) {
-  if (menuId == 12) {
+  if (menuId == 13) {
     id = choosenGroupSetting;
   }
 
@@ -81,7 +110,7 @@ void setGroup(int menuId) {
     else {
       groups[1] = 'C';
     }
-    id = 12;
+    id = 13;
   }
 
 }
@@ -101,15 +130,11 @@ void startSession(int menuId) {
 
 bool sendToClinet(int mode) {
   String txData;
-  DEBUG_PRINTLN(programLaps);
   if (mode == 0) {
     txData = String(groups[(programLaps + groupCounter % 2) % 2]);
-    char formatter3[3];
-    char formatter2[2];
-    sprintf(formatter3, "%03d", timeSetting);
-    sprintf(formatter2, "%02d", preShootSetting);
-    txData += formatter3;
-    txData += formatter2;
+    char timeFormat[7];
+    sprintf(timeFormat, "%03d%02d%02d", timeSetting, preShootSetting, yellowLEDSetting);
+    txData += timeFormat;
   }
   else if (mode == 1) {
     txData = "PAUSE";
@@ -123,8 +148,8 @@ bool sendToClinet(int mode) {
 
   DEBUG_PRINT("SEND: ");
   DEBUG_PRINTLN(txData);
-  char sendingArray[10];
-  txData.toCharArray(sendingArray, 10);
+  char sendingArray[12];
+  txData.toCharArray(sendingArray, 12);
 
   radio.stopListening(); // stop listening and start sending
   return radio.write( &sendingArray, sizeof(sendingArray));

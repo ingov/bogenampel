@@ -36,11 +36,11 @@
 #define ENCODER_PIN_2  A3
 /******* menu config BLOCKSIZE is number of rows on lcd MAXENTRIES length of menu ********/
 #define BLOCKSIZE 4
-#define MAXENTRIES 18
+#define MAXENTRIES 20
 
 // i2c address for master-slave communication
 #define SLAVE_ADDRESS 0x04
-#define CONFIG_SIZE 10
+#define CONFIG_SIZE 13
 
 int id = 1;
 int directionEncoder = 0;
@@ -48,15 +48,19 @@ bool buttonFired = false;
 
 /******* Program settings *********/
 int choosenProgram = 5;
-int choosenTimeSetting = 15;
+int choosenTimeSetting = 17;
 int choosenPreShootSetting = 16;
-int timeSetting = 10; // test for time
+int choosenYellowLEDSetting = 18;
+int timeSetting = 10;
 int timeSettingMax = 120;
-int timeSettingStep = 10;
-int preShootSetting = 10; // test for time
+const int timeSettingStep = 10;
+int preShootSetting = 10;
 int preShootSettingMax = 10;
-int preShootSettingStep = 1;
-int choosenGroupSetting = 17;
+const int preShootSettingStep = 1;
+int yellowLEDSetting = 30;
+const int yellowLEDSettingMax = 60;
+int yellowLEDSettingStep = 5;
+int choosenGroupSetting = 19;
 bool programStartet = false;
 int programLaps = 0;
 int groupCounter = 0;
@@ -87,15 +91,17 @@ const Menu menuentries [MAXENTRIES] = {
   { 7, 2, setProgram, noFunc, true, false, "Program 3" },
   { 8, 2, setProgram, noFunc, true, false, "Program 4" },
   { 9, 2, setProgram, noFunc, true, false, "Program 5" },
-  { 10, 3, setTime, timeTrigger, true, false, "Gr\xF5""nphase" },
-  { 11, 3, setPreShootTime, preShotTrigger, true, false, "Vorbereitung" },
-  { 12, 3, setGroup, noFunc, true, false, "Gruppen" },
-  { 13, 3, saveSettings, noFunc, true, false, "Speichern" },
-  { 14, 3, goBack, noFunc, true, false, "zur\xF5"" k" },
-  { 15, 10, setTime, timeTrigger, true,  true, "Zeit pro Passe"},
-  { 16, 11, setPreShootTime, preShotTrigger, true,  true, "Vorbereitung"},
-  { 17, 12, setGroup, noFunc, true, false, "AB" },
-  { 18, 12, setGroup, noFunc, true, false, "AB/CD" }
+  { 10, 3, setPreShootTime, preShotTrigger, true, false, "Vorbereitung" },
+  { 11, 3, setTime, timeTrigger, true, false, "Gr\xF5""nphase" },
+  { 12, 3, setYellowLEDTime, yellowLEDTrigger, true, false, "Gelbphase" },
+  { 13, 3, setGroup, noFunc, true, false, "Gruppen" },
+  { 14, 3, saveSettings, noFunc, true, false, "Speichern" },
+  { 15, 3, goBack, noFunc, true, false, "zur\xF5""ck" },
+  { 16, 10, setPreShootTime, preShotTrigger, true,  true, "Vorbereitung"},
+  { 17, 11, setTime, timeTrigger, true,  true, "Zeit pro Passe"},
+  { 18, 12, setYellowLEDTime, yellowLEDTrigger, true,  true, "Gelbphase"},
+  { 19, 13, setGroup, noFunc, true, false, "AB" },
+  { 20, 13, setGroup, noFunc, true, false, "AB/CD" }
 };
 char groups[2] = "AC";
 

@@ -4,7 +4,7 @@
 
 // i2c address for master-slave communication
 #define SLAVE_ADDRESS 0x04
-#define CONFIG_SIZE 10
+#define CONFIG_SIZE 13
 
 #define SD_CS_PIN 4
 #define CONFIG_FILENAME "config.txt"
@@ -26,7 +26,6 @@ void setup() {
   // define callbacks for i2c communication
   Wire.onReceive(receiveData);
   Wire.onRequest(sendData);
-
 
   if (SD.begin(SD_CS_PIN)) {
     digitalWrite(FAIL_LED, LOW);
@@ -58,7 +57,6 @@ void sendData() {
 }
 
 void loop() {
-  delay(100);
 }
 
 void sdPersist(String data) {

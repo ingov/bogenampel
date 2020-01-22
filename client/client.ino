@@ -48,6 +48,7 @@ TM1637Display groupDisplay(CLK, DIO_GROUP);
 bool programStartet = false;
 int secondsToRun = 0;
 int preShootTime = 0;
+int yellowLEDTime = 0;
 long currentTs;
 String shootGroup;
 long toneStart = 0;
@@ -62,7 +63,6 @@ long ledLastBlinkTime = 0;
 int ledBlinkDuration = 800;
 bool ledIsOn = false;
 bool switchToGreen = false;
-int timeOutForYellow = 5;
 
 const uint8_t SEG_AB[] = {
   SEG_A | SEG_B | SEG_C | SEG_E | SEG_F | SEG_G,
@@ -118,6 +118,7 @@ void loop() {
     shootGroup = data.substring(0, 1);
     int timeIntervall = String(data.substring(1, 4)).toInt();
     preShootTime = String(data.substring(4, 6)).toInt();
+    yellowLEDTime = String(data.substring(6, 8)).toInt();
     programStartet = true;
     secondsToRun = timeIntervall;
     currentTs = millis();
