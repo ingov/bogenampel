@@ -132,8 +132,8 @@ bool sendToClinet(int mode) {
   String txData;
   if (mode == 0) {
     txData = String(groups[(programLaps + groupCounter % 2) % 2]);
-    char timeFormat[7];
-    sprintf(timeFormat, "%03d%02d%02d", timeSetting, preShootSetting, yellowLEDSetting);
+    char timeFormat[9];
+    sprintf(timeFormat, "%03d%02d%02d%02d", timeSetting, preShootSetting, yellowLEDSetting, choosenGroupSetting);
     txData += timeFormat;
   }
   else if (mode == 1) {
@@ -148,8 +148,8 @@ bool sendToClinet(int mode) {
 
   DEBUG_PRINT("SEND: ");
   DEBUG_PRINTLN(txData);
-  char sendingArray[12];
-  txData.toCharArray(sendingArray, 12);
+  char sendingArray[15];
+  txData.toCharArray(sendingArray, 15);
 
   radio.stopListening(); // stop listening and start sending
   return radio.write( &sendingArray, sizeof(sendingArray));

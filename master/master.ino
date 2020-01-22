@@ -40,7 +40,7 @@
 
 // i2c address for master-slave communication
 #define SLAVE_ADDRESS 0x04
-#define CONFIG_SIZE 13
+#define CONFIG_SIZE 16
 
 int id = 1;
 int directionEncoder = 0;

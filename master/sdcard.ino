@@ -13,6 +13,7 @@ void loadConfigFromSlave() {
     timeSetting = data.substring(4, 7).toInt();
     preShootSetting = data.substring(8, 10).toInt();
     yellowLEDSetting = data.substring(11, 13).toInt();
+    choosenGroupSetting = data.substring(14, 16).toInt();
   }
   DEBUG_PRINT("got Configuration: ");
   DEBUG_PRINT(data);
@@ -22,11 +23,11 @@ void loadConfigFromSlave() {
 
 void saveConfigToSlave() {
 
-  //String configString = "P01T050R05";
+  //String configString = "P05T010R10Y30G19";
   String configString;
 
-  char formatter[14];
-  sprintf(formatter, "P%02dT%03dR%02dY%02d", choosenProgram, timeSetting, preShootSetting, yellowLEDSetting);
+  char formatter[16];
+  sprintf(formatter, "P%02dT%03dR%02dY%02dG%02d", choosenProgram, timeSetting, preShootSetting, yellowLEDSetting, choosenGroupSetting);
   configString += formatter;
   DEBUG_PRINT("yellow: ");
   DEBUG_PRINTLN(yellowLEDSetting);

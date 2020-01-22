@@ -4,7 +4,7 @@
 
 // i2c address for master-slave communication
 #define SLAVE_ADDRESS 0x04
-#define CONFIG_SIZE 13
+#define CONFIG_SIZE 16
 
 #define SD_CS_PIN 4
 #define CONFIG_FILENAME "config.txt"
