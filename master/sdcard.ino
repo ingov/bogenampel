@@ -1,6 +1,6 @@
 
 void loadConfigFromSlave() {
-  long start = millis();
+  //long start = millis();
   String data;
 
   Wire.requestFrom(SLAVE_ADDRESS, CONFIG_SIZE);
@@ -16,9 +16,8 @@ void loadConfigFromSlave() {
     choosenGroupSetting = data.substring(14, 16).toInt();
   }
   DEBUG_PRINT("got Configuration: ");
-  DEBUG_PRINT(data);
-  DEBUG_PRINT(" ms: ");
-  DEBUG_PRINTLN(millis() - start);
+  DEBUG_PRINTLN(data);
+
 }
 
 void saveConfigToSlave() {
@@ -26,13 +25,11 @@ void saveConfigToSlave() {
   //String configString = "P05T010R10Y30G19";
   String configString;
 
-  char formatter[16];
+  char formatter[17];
   sprintf(formatter, "P%02dT%03dR%02dY%02dG%02d", choosenProgram, timeSetting, preShootSetting, yellowLEDSetting, choosenGroupSetting);
   configString += formatter;
-  DEBUG_PRINT("yellow: ");
-  DEBUG_PRINTLN(yellowLEDSetting);
   DEBUG_PRINT("save config: ");
-  DEBUG_PRINTLN(configString);
+  DEBUG_PRINTLN(formatter);
 
   Wire.beginTransmission(SLAVE_ADDRESS);
   Wire.write(configString.c_str());

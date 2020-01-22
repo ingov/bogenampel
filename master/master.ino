@@ -86,7 +86,7 @@ const Menu menuentries [MAXENTRIES] = {
   { 2, 0, selectProgram, noFunc, true, false, "Program" },
   { 3, 0, noFunc, noFunc, true, false, "Einstellungen" },
   { 4, 0, startSession, noFunc, true, false, "Program starten" },
-  { 5, 2, setProgram, noFunc, true, false, "Program 1" },
+  { 5, 2, setProgram, noFunc, true, false, "WA 90 60 30" },
   { 6, 2, setProgram, noFunc, true, false, "Program 2" },
   { 7, 2, setProgram, noFunc, true, false, "Program 3" },
   { 8, 2, setProgram, noFunc, true, false, "Program 4" },
@@ -152,9 +152,6 @@ void loop() {
   // programm loop
   if (programStartet) {
     lcd.clear();
-    DEBUG_PRINTLN(menuentries[choosenProgram - 1].lable);
-    DEBUG_PRINTLN(menuentries[choosenGroupSetting - 1].lable);
-    DEBUG_PRINTLN(timeSetting);
 
     lcd.print(menuentries[choosenProgram - 1].lable);
     lcd.print(" ");
