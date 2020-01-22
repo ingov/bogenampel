@@ -11,9 +11,14 @@ void initUi() {
     blinkMode = true;
     groupDisplay.setSegments(SEG_ABCD);
   }
-  setLight('R', blinkMode);
-  counterDisplay.showNumberDec(preShootTime, false);
-  startTone(NOTE_C4, 1000);
+  if (hasPreShootTime) {
+    setLight('R', blinkMode);
+    counterDisplay.showNumberDec(preShootTime, false);
+    startTone(NOTE_C4, 1000);
+  }
+  else {
+    counterDisplay.showNumberDec(secondsToRun, false);
+  }
 }
 
 void exitUi() {
@@ -72,19 +77,15 @@ void switchLED(char mode) {
   ledIsOn = true;
   switch (mode) {
     case 'R':
-      DEBUG_PRINTLN("switch r");
       digitalWrite(RED_PIN, HIGH);
       break;
     case 'G':
-      DEBUG_PRINTLN("switch g");
       digitalWrite(GREEN_PIN, HIGH);
       break;
     case 'Y':
-      DEBUG_PRINTLN("switch y");
       digitalWrite(YELLOW_PIN, HIGH);
       break;
     default:
-      DEBUG_PRINTLN("switch default");
       ledIsOn = false;
       break;
   }

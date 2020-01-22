@@ -63,6 +63,7 @@ long ledLastBlinkTime = 0;
 int ledBlinkDuration = 800;
 bool ledIsOn = false;
 bool switchToGreen = false;
+bool hasPreShootTime = true;
 
 const uint8_t SEG_AB[] = {
   SEG_A | SEG_B | SEG_C | SEG_E | SEG_F | SEG_G,
@@ -116,15 +117,14 @@ void loop() {
     DEBUG_PRINTLN(rxPyload);
     String data = String(rxPyload);
     shootGroup = data.substring(0, 1);
-    int timeIntervall = String(data.substring(1, 4)).toInt();
+    secondsToRun = String(data.substring(1, 4)).toInt();
     preShootTime = String(data.substring(4, 6)).toInt();
     yellowLEDTime = String(data.substring(6, 8)).toInt();
     programStartet = true;
-    secondsToRun = timeIntervall;
+    hasPreShootTime = preShootTime > 0;
     currentTs = millis();
     initUi();
     switchToGreen = true;
-
   }
 
   if (programStartet) {
