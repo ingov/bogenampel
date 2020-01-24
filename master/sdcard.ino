@@ -9,11 +9,37 @@ void setupSD() {
   }
 }
 
-void loadConfigFromSD() {
+void loadGlobalConfigFromSd() {
   setupSD();
-  //long start = millis();
+  String data = getFileData(CONFIG_FILENAME);
+  if (data && data.substring(0, 1).equals("P")) {
+    choosenProgram = data.substring(1, 3).toInt();
+  }
+}
+
+void loadProgramConfigFromSD() {
+  setupSD();
+
+  char filePath[9];
+  sprintf(filePath, "P%02d.txt", choosenProgram);
+
+  String data = getFileData(filePath);
+  if (data && data.substring(0, 1).equals("P")) {
+    choosenProgram = data.substring(1, 3).toInt();
+    timeSetting = data.substring(4, 7).toInt();
+    preShootSetting = data.substring(8, 10).toInt();
+    yellowLEDSetting = data.substring(11, 13).toInt();
+    choosenGroupSetting = data.substring(14, 16).toInt();
+  }
+}
+
+
+String getFileData(char filePath[]) {
   String data;
-  sdFileHandler = SD.open(CONFIG_FILENAME);
+  DEBUG_PRINT("read File: ");
+  DEBUG_PRINTLN(filePath);
+
+  sdFileHandler = SD.open(filePath);
   if (sdFileHandler) {
     while (sdFileHandler.available()) {
       char character = sdFileHandler.read();
@@ -22,35 +48,48 @@ void loadConfigFromSD() {
     // close the file:
     sdFileHandler.close();
   }
-
-  if (data && data.substring(0, 1).equals("P")) {
-    choosenProgram = data.substring(1, 3).toInt();
-    timeSetting = data.substring(4, 7).toInt();
-    preShootSetting = data.substring(8, 10).toInt();
-    yellowLEDSetting = data.substring(11, 13).toInt();
-    choosenGroupSetting = data.substring(14, 16).toInt();
-  }
-  DEBUG_PRINT("got Configuration: ");
+  DEBUG_PRINT("content is: ");
   DEBUG_PRINTLN(data);
+  return data;
+}
+
+// P05T010R10Y30G19
+void saveGlobalConfigToSd() {
+  setupSD();
+  char fileContent[3];
+  sprintf(fileContent, "P%02d", choosenProgram);
+  saveToFile(CONFIG_FILENAME, fileContent);
+}
+
+void saveProgramConfigToSD() {
+  setupSD();
+
+  char filePath[7];
+  sprintf(filePath, "P%02d.txt", choosenProgram);
+
+  //String configString = "P05T010R10Y30G19";
+  char fileContent[17];
+  sprintf(fileContent, "P%02dT%03dR%02dY%02dG%02d", choosenProgram, timeSetting, preShootSetting, yellowLEDSetting, choosenGroupSetting);
+  saveToFile(filePath, fileContent);
+
+  DEBUG_PRINT("save config: ");
+  DEBUG_PRINTLN(fileContent);
 
 }
 
-void saveConfigToSD() {
-  setupSD();
-  //String configString = "P05T010R10Y30G19";
-  String configString;
+void saveToFile(char filePath[], char fileContent[]) {
 
-  char formatter[17];
-  sprintf(formatter, "P%02dT%03dR%02dY%02dG%02d", choosenProgram, timeSetting, preShootSetting, yellowLEDSetting, choosenGroupSetting);
-  configString += formatter;
-  DEBUG_PRINT("save config: ");
-  DEBUG_PRINTLN(formatter);
+  DEBUG_PRINT("save to file: ");
+  DEBUG_PRINTLN(filePath);
+  DEBUG_PRINT("content: ");
+  DEBUG_PRINTLN(fileContent);
 
-  SD.remove(CONFIG_FILENAME);
-  sdFileHandler = SD.open(CONFIG_FILENAME, FILE_WRITE);
+  SD.remove(filePath);
+  sdFileHandler = SD.open(filePath, FILE_WRITE);
   if (sdFileHandler) {
-    sdFileHandler.print(configString);
+    sdFileHandler.print(fileContent);
     // close the file:
     sdFileHandler.close();
   }
+
 }

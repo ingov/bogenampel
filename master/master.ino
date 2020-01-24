@@ -6,7 +6,7 @@
 #include <RotaryEncoder.h>        //rotary encoder library
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-#include "SD.h"
+#include <SD.h>
 
 
 #if defined(ARDUINO) && ARDUINO >= 100
@@ -42,7 +42,7 @@
 /*********** SD Card settings *********/
 #define SD_CS_PIN 4
 #define CONFIG_SIZE 16
-#define CONFIG_FILENAME "config.txt"
+const char CONFIG_FILENAME[10] = "config.txt";
 #define SD_FAIL_LED 2
 #define SD_OK_LED 3
 
@@ -137,7 +137,8 @@ void setup() {
   digitalWrite(SD_FAIL_LED, HIGH);
   digitalWrite(SD_OK_LED, HIGH);
   // first SD call
-  loadConfigFromSD();
+  loadGlobalConfigFromSd();
+  loadProgramConfigFromSD();
 
 
   // You may have to modify the next 2 lines if using other pins than A2 and A3

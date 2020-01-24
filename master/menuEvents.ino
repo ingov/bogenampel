@@ -8,6 +8,8 @@ void selectProgram(int menuId) {
 
 void setProgram(int menuId) {
   choosenProgram = menuId;
+  saveGlobalConfigToSd();
+  loadProgramConfigFromSD();
   id = 2;
 }
 
@@ -120,7 +122,7 @@ void goBack(int menuId) {
 }
 
 void saveSettings(int menuId) {
-  saveConfigToSD();
+  saveProgramConfigToSD();
   id = 3;
 }
 
