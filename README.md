@@ -1,10 +1,4 @@
 # Bogenampel
 
 ## TODS
-* alle Programme speichern
-
-### Fragen
-* Passen einstellen? 
-* Nachschiessen?
-* Pause/Stop?
-* Automatischer Durchlauf AB/CD?
+https://trello.com/b/8KOvCqko/bogenampel
