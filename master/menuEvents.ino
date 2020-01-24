@@ -120,7 +120,7 @@ void goBack(int menuId) {
 }
 
 void saveSettings(int menuId) {
-  saveConfigToSlave();
+  saveConfigToSD();
   id = 3;
 }
 

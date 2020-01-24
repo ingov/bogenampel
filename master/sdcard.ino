@@ -1,13 +1,28 @@
+void setupSD() {
+  digitalWrite(SD_FAIL_LED, HIGH);
+  digitalWrite(SD_OK_LED, HIGH);
+  if (SD.begin(SD_CS_PIN)) {
+    digitalWrite(SD_FAIL_LED, LOW);
+  }
+  else {
+    digitalWrite(SD_OK_LED, LOW);
+  }
+}
 
-void loadConfigFromSlave() {
+void loadConfigFromSD() {
+  setupSD();
   //long start = millis();
   String data;
-
-  Wire.requestFrom(SLAVE_ADDRESS, CONFIG_SIZE);
-  while (Wire.available())  {
-    char character = Wire.read();
-    data += character;
+  sdFileHandler = SD.open(CONFIG_FILENAME);
+  if (sdFileHandler) {
+    while (sdFileHandler.available()) {
+      char character = sdFileHandler.read();
+      data += character;
+    }
+    // close the file:
+    sdFileHandler.close();
   }
+
   if (data && data.substring(0, 1).equals("P")) {
     choosenProgram = data.substring(1, 3).toInt();
     timeSetting = data.substring(4, 7).toInt();
@@ -20,8 +35,8 @@ void loadConfigFromSlave() {
 
 }
 
-void saveConfigToSlave() {
-
+void saveConfigToSD() {
+  setupSD();
   //String configString = "P05T010R10Y30G19";
   String configString;
 
@@ -31,8 +46,11 @@ void saveConfigToSlave() {
   DEBUG_PRINT("save config: ");
   DEBUG_PRINTLN(formatter);
 
-  Wire.beginTransmission(SLAVE_ADDRESS);
-  Wire.write(configString.c_str());
-  Wire.endTransmission();
-
+  SD.remove(CONFIG_FILENAME);
+  sdFileHandler = SD.open(CONFIG_FILENAME, FILE_WRITE);
+  if (sdFileHandler) {
+    sdFileHandler.print(configString);
+    // close the file:
+    sdFileHandler.close();
+  }
 }

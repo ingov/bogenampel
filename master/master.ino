@@ -6,6 +6,8 @@
 #include <RotaryEncoder.h>        //rotary encoder library
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include "SD.h"
+
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #define printByte(args)  write(args);
@@ -32,15 +34,17 @@
 #define LCDML_DISP_cfg_cursor 0x7E   // cursor Symbol
 // ***************** rotary encoder *************** //
 #define ENCODER_PIN_B  A1
-#define ENCODER_PIN_1  A2
-#define ENCODER_PIN_2  A3
+#define ENCODER_PIN_1  A8
+#define ENCODER_PIN_2  A9
 /******* menu config BLOCKSIZE is number of rows on lcd MAXENTRIES length of menu ********/
 #define BLOCKSIZE 4
 #define MAXENTRIES 20
-
-// i2c address for master-slave communication
-#define SLAVE_ADDRESS 0x04
+/*********** SD Card settings *********/
+#define SD_CS_PIN 4
 #define CONFIG_SIZE 16
+#define CONFIG_FILENAME "config.txt"
+#define SD_FAIL_LED 2
+#define SD_OK_LED 3
 
 int id = 1;
 int directionEncoder = 0;
@@ -79,6 +83,9 @@ RotaryEncoder encoder(ENCODER_PIN_1, ENCODER_PIN_2);
 // Setup a new OneButton on pin A1.
 OneButton button(ENCODER_PIN_B, true);
 
+// SD-Card
+File sdFileHandler;
+
 
 // represents the Menu-structure
 const Menu menuentries [MAXENTRIES] = {
@@ -111,10 +118,6 @@ byte upArrow[] = {B00100, B01110, B10101, B00100, B00100, B00100, B00100, B00000
 void setup() {
   DEBUG_BEGIN(9600);
 
-  // start wire for arduino2arduino communication
-  Wire.begin();
-
-  loadConfigFromSlave();
 
   // init RF24
   radio.begin();
@@ -124,14 +127,22 @@ void setup() {
   radio.openReadingPipe(1, addresses[1]);
   radio.stopListening();
 
-
   lcd.init();
   lcd.backlight();
   lcd.createChar(1, upArrow);
 
+  //sd card init
+  pinMode (SD_FAIL_LED, OUTPUT);
+  pinMode (SD_OK_LED, OUTPUT);
+  digitalWrite(SD_FAIL_LED, HIGH);
+  digitalWrite(SD_OK_LED, HIGH);
+  // first SD call
+  loadConfigFromSD();
+
+
   // You may have to modify the next 2 lines if using other pins than A2 and A3
-  PCICR |= (1 << PCIE1);    // This enables Pin Change Interrupt 1 that covers the Analog input pins or Port C.
-  PCMSK1 |= (1 << PCINT10) | (1 << PCINT11);  // This enables the interrupt for pin 2 and 3 of Port C.
+  PCMSK2 |= (1 << PCINT16) | (1 << PCINT17);  // This enables the interrupt for pin A8 and A9 of Port C.
+  PCICR |= (1 << PCIE2);    // This enables Pin Change Interrupt 1 that covers the Analog input pins or Port C.
 
   // setup button
   button.attachClick(buttonClicked);
@@ -140,7 +151,7 @@ void setup() {
   drawMenu();
 }
 
-ISR(PCINT1_vect) {
+ISR (PCINT2_vect) {
   encoder.tick(); // just call tick() to check the state.
 }
 
