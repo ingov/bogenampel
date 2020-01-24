@@ -34,7 +34,6 @@ void updateUi() {
   }
   if (secondsToRun == yellowLEDTime) {
     setLight('Y', false);
-    startTone(NOTE_D5, 200);
   }
 
 
