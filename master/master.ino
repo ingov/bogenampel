@@ -97,7 +97,7 @@ const Menu menuentries [MAXENTRIES] = {
   { 6, 2, setProgram, noFunc, true, false, "WA 50 30" },
   { 7, 2, setProgram, noFunc, true, false, "WA Halle" },
   { 8, 2, setProgram, noFunc, true, false, "Finale" },
-  { 9, 2, setProgram, noFunc, true, false, "Program 5" },
+  { 9, 2, setProgram, noFunc, true, false, "Frei" },
   { 10, 3, setPreShootTime, preShotTrigger, true, false, "Vorbereitung" },
   { 11, 3, setTime, timeTrigger, true, false, "Gr\xF5""nphase" },
   { 12, 3, setYellowLEDTime, yellowLEDTrigger, true, false, "Gelbphase" },
