@@ -85,6 +85,10 @@ const uint8_t SEG_ABCD[] = {
 
 void setup() {
   DEBUG_BEGIN(9600);
+  // setup LED
+  pinMode(RED_PIN, OUTPUT);
+  pinMode(GREEN_PIN, OUTPUT);
+  pinMode(YELLOW_PIN, OUTPUT);
 
   // setup radio
   radio.begin();
@@ -97,14 +101,10 @@ void setup() {
   // setup 7 seg Display
   counterDisplay.setBrightness(0x0f);
   groupDisplay.setBrightness(0x0f);
-
-  // setup LED
-
-  pinMode(RED_PIN, OUTPUT);
-  pinMode(GREEN_PIN, OUTPUT);
-  pinMode(YELLOW_PIN, OUTPUT);
+  
 
   DEBUG_PRINTLN("Client Up");
+  functionTest();
   initUi();
 }
 

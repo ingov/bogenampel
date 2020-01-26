@@ -1,3 +1,18 @@
+void functionTest() {
+  switchLED('X');
+  groupDisplay.setSegments(SEG_ABCD);
+  counterDisplay.showNumberDec(8888, true);
+  delay(800);
+  switchLED('R');
+  delay(800);
+  switchLED('Y');
+  delay(800);
+  switchLED('G');
+  delay(800);
+  groupDisplay.setSegments(SEG_AB);
+}
+
+
 void initUi() {
   DEBUG_PRINTLN("START");
   bool blinkMode = false;
@@ -9,7 +24,7 @@ void initUi() {
   }
   else {
     blinkMode = true;
-    groupDisplay.setSegments(SEG_ABCD);
+    groupDisplay.setSegments(SEG_AB);
   }
   if (hasPreShootTime) {
     setLight('R', blinkMode);
