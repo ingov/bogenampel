@@ -2,13 +2,15 @@ void functionTest() {
   switchLED('X');
   groupDisplay.setSegments(SEG_ABCD);
   counterDisplay.showNumberDec(8888, true);
-  delay(800);
-  switchLED('R');
-  delay(800);
-  switchLED('Y');
-  delay(800);
-  switchLED('G');
-  delay(800);
+  delay(400);
+  switchLED('A');
+  delay(500);
+  switchLED('X');
+  delay(400);
+  switchLED('A');
+  delay(500);
+  switchLED('X');
+  delay(400);
   groupDisplay.setSegments(SEG_AB);
 }
 
@@ -98,6 +100,11 @@ void switchLED(char mode) {
       break;
     case 'Y':
       digitalWrite(YELLOW_PIN, HIGH);
+      break;
+    case 'A':
+      digitalWrite(YELLOW_PIN, HIGH);
+      digitalWrite(RED_PIN, HIGH);
+      digitalWrite(GREEN_PIN, HIGH);
       break;
     default:
       ledIsOn = false;
