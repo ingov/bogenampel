@@ -37,7 +37,7 @@
 // RF24 setup
 RF24 radio(6, 7); // Hardware Konfiguration: RF24L01 Modul
 byte addresses[][6] = {"BATV10", "BARV10"}; // Device Address Transmitter/Receiver
-char rxPyload[10];
+char rxPyload[16];
 
 // TM1637Display constructor
 TM1637Display counterDisplay(CLK, DIO_COUNTER);
@@ -51,6 +51,7 @@ int preShootTime = 0;
 int yellowLEDTime = 0;
 long currentTs;
 String shootGroup;
+String nextShootGroup;
 long toneStart = 0;
 long toneDuration = 0;
 int toneRepeatAfter = 0;
@@ -71,9 +72,10 @@ const uint8_t SEG_AB[] = {
   !SEG_G, !SEG_G
 };
 const uint8_t SEG_CD[] = {
+  !SEG_A, !SEG_A,
   SEG_A | SEG_D | SEG_E | SEG_F,
-  SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F,
-  !SEG_A, !SEG_A
+  SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F
+  
 };
 const uint8_t SEG_ABCD[] = {
   SEG_A | SEG_B | SEG_C | SEG_E | SEG_F | SEG_G,
@@ -117,9 +119,10 @@ void loop() {
     DEBUG_PRINTLN(rxPyload);
     String data = String(rxPyload);
     shootGroup = data.substring(0, 1);
-    secondsToRun = String(data.substring(1, 4)).toInt();
-    preShootTime = String(data.substring(4, 6)).toInt();
-    yellowLEDTime = String(data.substring(6, 8)).toInt();
+    nextShootGroup = data.substring(1, 2);
+    secondsToRun = String(data.substring(2, 5)).toInt();
+    preShootTime = String(data.substring(5, 7)).toInt();
+    yellowLEDTime = String(data.substring(7, 9)).toInt();
     programStartet = true;
     hasPreShootTime = preShootTime > 0;
     currentTs = millis();

@@ -39,6 +39,13 @@ void initUi() {
 }
 
 void exitUi() {
+  if (nextShootGroup.equals("A")) {
+    groupDisplay.setSegments(SEG_AB);
+  }
+  else if (nextShootGroup.equals("C")) {
+    groupDisplay.setSegments(SEG_CD);
+  }
+  
   DEBUG_PRINTLN("STOP");
   setLight('R', true);
   startTone(NOTE_C4, 800, 400);

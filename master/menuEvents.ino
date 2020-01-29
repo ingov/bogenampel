@@ -127,15 +127,22 @@ void saveSettings(int menuId) {
 }
 
 void startSession(int menuId) {
+  calcNextLoopParams();
   programStartet = sendToClinet(0);
 }
 
 bool sendToClinet(int mode) {
   String txData;
   if (mode == 0) {
-    txData = String(groups[(programLaps + groupCounter % 2) % 2]);
+
+    char group = groups[programGroup];
+    char nextGrp = groups[nextGroup];
+
+    
     char timeFormat[9];
     sprintf(timeFormat, "%03d%02d%02d%02d", timeSetting, preShootSetting, yellowLEDSetting, choosenGroupSetting);
+    txData += group;
+    txData += nextGrp;
     txData += timeFormat;
   }
   else if (mode == 1) {
@@ -147,12 +154,20 @@ bool sendToClinet(int mode) {
   else {
     txData = "NULL";
   }
-
+  // AC120051020
   DEBUG_PRINT("SEND: ");
   DEBUG_PRINTLN(txData);
-  char sendingArray[15];
-  txData.toCharArray(sendingArray, 15);
+    //DEBUG_PRINTLN(programLaps % 2);
+    //DEBUG_PRINTLN(loopCounter % 2);
+    
+    //DEBUG_PRINTLN(groups[(programLaps + (groupCounter +1 % 2)) % 2]);
+    //DEBUG_PRINTLN(groups[(programLaps +1 + (groupCounter +1 % 2)) % 2]);
+    
 
+
+  //AC010040520
+  char sendingArray[12];
+  txData.toCharArray(sendingArray, 12);
   radio.stopListening(); // stop listening and start sending
   return radio.write( &sendingArray, sizeof(sendingArray));
 

@@ -67,7 +67,9 @@ int yellowLEDSettingStep = 5;
 int choosenGroupSetting = 19;
 bool programStartet = false;
 int programLaps = 0;
-int groupCounter = 0;
+int programLoops = 0;
+int programGroup = 0;
+int nextGroup = 0;
 /******* Program settings *********/
 
 // RF24 setup
@@ -172,16 +174,15 @@ void loop() {
     lcd.print("Zeit ");
     lcd.print(timeSetting);
     lcd.setCursor(9, 1);
-    lcd.print((groups[(programLaps + groupCounter % 2) % 2] == 'A') ? "AB" : "CD" );
+    lcd.print("AB");
     lcd.setCursor(12, 1);
-    lcd.print("Runde ");
-    lcd.print(programLaps + 1);
+    lcd.print("Runde 1");
 
     lcd.setCursor(0, 2);
     lcd.print("Weiter  Pause  Stop");
-
     int chooser = -1;
     bool stateChange = false;
+    programLoops++;
 
     while (programStartet) {
       button.tick();
@@ -222,21 +223,17 @@ void loop() {
         buttonFired = false;
 
         if (chooser == 0) {
-          // toggle groups (ab/cd/cd/ab/ab/cd...)
-          if (programLaps % 2) {
-            groupCounter++;
-          }
-          programLaps++;
+
+          calcNextLoopParams();
           if (sendToClinet(chooser)) {
             lcd.setCursor(9, 1);
-            lcd.print((groups[(programLaps + groupCounter % 2) % 2] == 'A') ? "AB" : "CD");
+            lcd.print((groups[programGroup] == 'A') ? "AB" : "CD");
             lcd.setCursor(12, 1);
             lcd.print("Runde ");
-            lcd.print(programLaps + 1);
+            lcd.print(programLaps);
+            programLoops++;
           }
-          else {
-            programLaps--;
-          }
+
         }
         else {
           sendToClinet(chooser);
@@ -249,7 +246,7 @@ void loop() {
 
           programStartet = false;
           programLaps = 0;
-          groupCounter = 0;
+          programGroup = 0;
           id = 4;
           drawMenu();
 
@@ -270,4 +267,20 @@ void loop() {
     drawMenu();
     buttonFired = false;
   }
+}
+
+
+void calcNextLoopParams() {
+  if (choosenGroupSetting == 20) {
+    programLaps += (programLoops + 1) % 2;
+    int tmpgrp = (programLoops % 2);
+    nextGroup = programLaps % 2;
+    programGroup = (nextGroup == tmpgrp) ? 1 : 0;
+  }
+  else {
+    programLaps += 1;
+    programGroup = 0;
+    nextGroup = 0;
+  }
+
 }
